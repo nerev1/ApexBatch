@@ -3,12 +3,13 @@ global class AccountHierarchyIterator implements Iterator<Account> {
     Integer i {get; set;}
 
     public AccountHierarchyIterator(Account account) {
+        accounts.add(account);
         generateAccountsList(account, 0);
         i = 0;
     }
 
     private void generateAccountsList(Account account, Integer depth) {
-        List<Account> childAccounts = [SELECT Name, Total_Amount__c, ParentId
+        List<Account> childAccounts = [SELECT Name, Total_Amount__c, ParentId, (SELECT Amount FROM Opportunities WHERE StageName='Closed Won')
                                     FROM Account
                                     WHERE ParentId = :account.Id];
 
@@ -19,6 +20,15 @@ global class AccountHierarchyIterator implements Iterator<Account> {
                 generateAccountsList(childAccount, depth);
             }
         }
+        account.Total_Amount__c = countOppotunitiesAmount(account);
+    }
+
+    private Double countOppotunitiesAmount(Account account) {
+        Double accountOpportunitiesAmount = 0;
+        for ( Opportunity opportunity : account.Opportunities) {
+            accountOpportunitiesAmount += opportunity.Amount;
+        }
+        return accountOpportunitiesAmount;
     }
 
     global boolean hasNext() {
