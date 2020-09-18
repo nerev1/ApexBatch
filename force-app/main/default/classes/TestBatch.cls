@@ -37,5 +37,17 @@ private class TestBatch {
                                         WHERE Id IN :accounts
                                         AND Total_Amount__c > 0];
         System.assertEquals(6, updatedAccounts.size());
+        
+        Account firstAccountInHierarchy = [SELECT Total_Amount__c 
+                                           FROM Account 
+                                           WHERE Id IN :accounts 
+                                           AND Name = 'Account 1' LIMIT 1];
+        System.assertEquals(120, firstAccountInHierarchy.Total_Amount__c);
+        
+        Account thirdAccountInHierarchy = [SELECT Total_Amount__c 
+                                           FROM Account 
+                                           WHERE Id IN :accounts 
+                                           AND Name = 'Account 3' LIMIT 1];
+        System.assertEquals(80, thirdAccountInHierarchy.Total_Amount__c);
     }
 }
